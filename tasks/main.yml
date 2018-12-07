@@ -1,0 +1,36 @@
+---
+- name: Install required packages
+  apt:
+    name:
+      - mysql-server-5.7
+    state: latest
+
+- name: Install required Python packages
+  pip:
+    name:
+      - PyMySQL
+    state: latest
+
+- name: Tweak mysqldump config
+  copy:
+    src: mysqldump.cnf
+    dest: /etc/mysql/conf.d/mysqldump.cnf
+
+- name: Create MySQL databases
+  mysql_db:
+    name: '{{ item }}'
+    encoding: utf8mb4
+    collation: utf8mb4_unicode_ci
+    state: present
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  with_items: '{{ mysql_databases }}'
+
+- name: Create MySQL users with according privileges
+  mysql_user:
+    name: '{{ item.name }}'
+    password: '{{ item.password }}'
+    encrypted: true
+    priv: "{{ item.owned_databases|map('regex_replace', '^(.+)$', '\\1.*:ALL')|join('/') }}"
+    state: present
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  with_items: '{{ mysql_users }}'
