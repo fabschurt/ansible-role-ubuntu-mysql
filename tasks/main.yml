@@ -16,6 +16,12 @@
     src: mysqldump.cnf
     dest: /etc/mysql/conf.d/mysqldump.cnf
 
+- name: Make sure MySQL is running and will start on boot
+  service:
+    name: mysql
+    enabled: true
+    state: started
+
 - name: Create MySQL databases
   mysql_db:
     name: '{{ item }}'
@@ -27,7 +33,7 @@
 
 - name: Create MySQL users with according privileges
   mysql_user:
-    name: '{{ item.name }}'
+    name: '{{ item.username }}'
     password: '{{ item.password }}'
     encrypted: true
     priv: "{{ item.owned_databases|map('regex_replace', '^(.+)$', '\\1.*:ALL')|join('/') }}"

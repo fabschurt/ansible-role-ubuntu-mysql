@@ -1,6 +1,19 @@
 ---
-- hosts: 127.0.0.1
-  connection: local
-  become: true
+- hosts: ansible-vm
   roles:
     - role: ../ansible-role-ubuntu-mysql
+      mysql_databases:
+        - db1
+        - db2
+      mysql_users:
+        -
+          username: john
+          password: '*06C0BF5B64ECE2F648B5F048A71903906BA08E5C' # test1
+          owned_databases:
+            - db2
+        -
+          username: jack
+          password: '*7CEB3FDE5F7A9C4CE5FBE610D7D8EDA62EBE5F4E' # test2
+          owned_databases:
+            - db1
+            - db2
