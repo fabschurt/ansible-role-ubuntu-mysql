@@ -35,8 +35,17 @@
   mysql_user:
     name: '{{ item.username }}'
     password: '{{ item.password }}'
+    host: '%'
     encrypted: true
     priv: "{{ item.owned_databases|map('regex_replace', '^(.+)$', '\\1.*:ALL')|join('/') }}"
     state: present
     login_unix_socket: /var/run/mysqld/mysqld.sock
   with_items: '{{ mysql_users }}'
+
+- name: Make sure MySQL is open to the world
+  lineinfile:
+    path: /etc/mysql/mysql.conf.d/mysqld.cnf
+    regexp: '^bind-address\s*='
+    line: 'bind-address = 0.0.0.0'
+    state: present
+  notify: mysql_configured
